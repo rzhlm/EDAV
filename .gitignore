@@ -1,0 +1,11 @@
+.venv
+*.bat
+
+__pycache__/
+*.py[cod]
+*.ruff_cache
+.env
+dist/
+build/
+
+
