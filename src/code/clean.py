@@ -1,6 +1,8 @@
 import pandas as pd 
 
 
+# Free data, licensed CC-BY
+# https://www.gapminder.org/data/
 data = pd.read_csv("./data/gapminder-lex.csv")
 
 nordics = ["Denmark", "Sweden", "Norway", "Finland","Iceland"]

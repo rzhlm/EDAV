@@ -1,5 +1,8 @@
 .venv
 *.bat
+*.png
+*.svg
+outputs/
 
 __pycache__/
 *.py[cod]
