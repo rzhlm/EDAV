@@ -6,6 +6,15 @@ import matplotlib.pyplot as plt
 # INIT:
 ## constants
 out = "./outputs/"
+BLUE = "#0072B2"
+SOURCE = ("")
+styles = {
+    "Denmark": ("#666666", "-."),
+    "Finland": ("#555555", "-"),
+    "Iceland": ("#222222", "-"),
+    "Norway": ("#666666", ":"),
+    "Sweden": ("#444444", "--"),
+}
 
 pd_nordics = pd.read_csv("./data/nordics-lex-1950-2005.csv")
 
@@ -64,3 +73,67 @@ print(
     f"in {minimum_text}"
 )
 
+# Helper functions
+## Shared styling
+styles[focus] = (BLUE, "-")
+
+drawing_order = [country for country in wide.index if country != focus]
+drawing_order.append(focus)
+
+
+def save(fig, filename, title=None, note=""):
+    """Add headings and export."""
+    if title is not None:
+        fig.text(
+            0.02, 0.97, title,
+            fontsize=13, weight="bold", va="top"
+        )
+        fig.text(
+            0.02, 0.02, f"{note}\n{SOURCE}",
+            fontsize=8.5, va="bottom"
+        )
+
+    for extension in ("png", "svg"):
+        fig.savefig(
+            out + f"{filename}.{extension}",
+            dpi=300, bbox_inches="tight"
+        )
+
+    plt.close(fig)
+
+
+def clean_axes(ax, grid_axis="y"):
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+
+    ax.set_axisbelow(True)
+    ax.grid(axis=grid_axis, color="#E2E2E2", linewidth=0.7)
+
+
+def label_positions(values, gap=1.3):
+    """Move labels while keeping data points in their true positions."""
+    positions = values.sort_values().copy()
+
+    for i in range(1, len(positions)):
+        positions.iloc[i] = max(
+            positions.iloc[i],
+            positions.iloc[i - 1] + gap
+        )
+
+    return positions - (positions - values).mean()
+
+
+# default plots: Fig 1
+
+plt.rcdefaults()
+pd.options.plotting.backend = "matplotlib"
+
+ax = endpoints.plot()
+save(ax.figure, "figure_1_reference")
+
+
+# styling done after making the default plots.
+plt.rcParams.update({
+    "font.size": 11,
+    "svg.fonttype": "none"
+})
