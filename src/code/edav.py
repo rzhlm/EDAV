@@ -122,6 +122,7 @@ def label_positions(values, gap=1.3):
 
     return positions - (positions - values).mean()
 
+# ----------------------------------------------------------------------------
 
 # default plots: Fig 1
 
@@ -137,3 +138,57 @@ plt.rcParams.update({
     "font.size": 11,
     "svg.fonttype": "none"
 })
+
+# ----------------------------------------------------------------------------
+
+# Fig 2: grouped horizontal bars
+
+fig, ax = plt.subplots(figsize=(7.6, 5.0))
+fig.subplots_adjust(left=0.17, right=0.81, bottom=0.05, top=0.76)
+
+y = np.arange(len(ordered))
+
+for year, offset, color, hatch in [
+    (start, -0.17, "#BDBDBD", "///"),
+    (end, 0.17, "#555555", None),
+]:
+    bars = ax.barh(
+        y + offset, ordered[year], height=0.29,
+        color=color, hatch=hatch, label=str(year),
+        edgecolor="#444444", linewidth=0.5
+    )
+    ax.bar_label(bars, fmt="%.1f", padding=4, fontsize=10)
+
+ax.set_yticks(y, ordered.index)
+ax.invert_yaxis()
+ax.set(
+    xlim=(0, high + 5),
+    xlabel="Life expectancy at birth (years)"
+)
+
+ax.get_yticklabels()[0].set_color(BLUE)
+ax.get_yticklabels()[0].set_weight("bold")
+
+clean_axes(ax, "x")
+ax.legend(
+    loc="lower left", bbox_to_anchor=(0, 1.01),
+    ncol=2, frameon=False
+)
+
+ax.text(
+    1.04, 1.03, "Gain\n(years)",
+    transform=ax.transAxes, weight="bold", va="bottom"
+)
+
+for row, country in enumerate(ordered.index):
+    ax.text(
+        1.04, row, f"{ordered.loc[country, 'gain_years']:+.1f}",
+        transform=ax.get_yaxis_transform(), va="center",
+        color=BLUE if country == focus else "#333333"
+    )
+
+save(
+    fig, "figure_2_grouped_bars",
+    "",
+    ""
+)
