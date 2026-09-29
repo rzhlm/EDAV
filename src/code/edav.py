@@ -192,3 +192,137 @@ save(
     "",
     ""
 )
+
+# ----------------------------------------------------------------------------
+
+# Fig 3: slopegraph
+
+fig, ax = plt.subplots(figsize=(8.2, 5.7))
+fig.subplots_adjust(left=0.10, right=0.98, bottom=0.05, top=0.83)
+
+left_labels = label_positions(endpoints[start])
+right_labels = label_positions(endpoints[end])
+
+for country in drawing_order:
+    first, last = endpoints.loc[country]
+    gain = summary.loc[country, "gain_years"]
+    color, line_style = styles[country]
+
+    ax.plot(
+        [0, 1], [first, last],
+        color=color, linestyle=line_style, marker="o",
+        linewidth=2.8 if country == focus else 1.4,
+        markersize=5
+    )
+
+    ax.plot(
+        [-0.04, 0], [left_labels[country], first],
+        color=color, linewidth=0.7
+    )
+    ax.plot(
+        [1, 1.04], [last, right_labels[country]],
+        color=color, linewidth=0.7
+    )
+
+    ax.text(
+        -0.06, left_labels[country],
+        f"{country}  {first:.1f}",
+        ha="right", va="center", color=color, fontsize=10
+    )
+    ax.text(
+        1.06, right_labels[country],
+        f"{country}  {last:.1f}  ({gain:+.1f})",
+        ha="left", va="center", color=color, fontsize=10
+    )
+
+ax.set(
+    xlim=(-0.70, 1.95), ylim=(low, high),
+    ylabel="Life expectancy at birth (years)"
+)
+ax.set_xticks([0, 1], [str(start), str(end)])
+ax.set_yticks(np.arange(low, high + 1, 5))
+ax.tick_params(axis="x", length=0)
+
+clean_axes(ax)
+ax.spines["bottom"].set_visible(False)
+
+save(
+    fig, "figure_3_slopegraph",
+    "",
+    ""
+)
+
+# ----------------------------------------------------------------------------
+
+# Fig 4: annotated heatmap
+temporary_low = low
+temporary_high = high
+
+# override:
+low = 64
+high = 82
+bottom=0.05
+
+fig, ax = plt.subplots(figsize=(7.6, 4.8))
+fig.subplots_adjust(left=0.18, right=0.90, bottom=bottom, top=0.79)
+
+matrix = ordered[[start, end]].to_numpy()
+
+image = ax.pcolormesh(
+    matrix, cmap="Greys", vmin=low, vmax=high,
+    edgecolors="white", linewidth=0.8
+)
+
+# The third column has no fill.
+ax.set(xlim=(0, 3.1), ylim=(len(ordered), 0))
+ax.set_xticks([0.5, 1.5], [str(start), str(end)])
+ax.set_yticks(np.arange(len(ordered)) + 0.5, ordered.index)
+
+ax.tick_params(
+    axis="x", top=True, labeltop=True,
+    bottom=False, labelbottom=False, length=0
+)
+ax.tick_params(axis="y", length=0, pad=8)
+
+for spine in ax.spines.values():
+    spine.set_visible(False)
+
+for row, country in enumerate(ordered.index):
+    for column, year in enumerate((start, end)):
+        value = ordered.loc[country, year]
+        shade = image.cmap(image.norm(value))[0]
+
+        ax.text(
+            column + 0.5, row + 0.5, f"{value:.1f}",
+            ha="center", va="center",
+            color="white" if shade < 0.5 else "black"
+        )
+
+    ax.text(
+        2.6, row + 0.5,
+        f"{ordered.loc[country, 'gain_years']:+.1f}",
+        ha="center", va="center",
+        color=BLUE if country == focus else "#333333"
+    )
+
+ax.text(
+    2.6, -0.05, "Gain\n(years)",
+    ha="center", va="bottom", weight="bold"
+)
+ax.get_yticklabels()[0].set_color(BLUE)
+ax.get_yticklabels()[0].set_weight("bold")
+
+colorbar = fig.colorbar(image, ax=ax, pad=0.05, fraction=0.05)
+colorbar.set_ticks(np.arange(low, high + 1, 3))  #############################
+colorbar.set_label("Life expectancy (years)")
+
+save(
+    fig, "figure_4_heatmap",
+    "",
+    ""
+)
+
+low = temporary_low
+high = temporary_high
+
+# ----------------------------------------------------------------------------
