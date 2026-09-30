@@ -326,3 +326,83 @@ low = temporary_low
 high = temporary_high
 
 # ----------------------------------------------------------------------------
+
+# Fig 5: more time-detail
+
+fig, (top, bottom) = plt.subplots(
+    2, 1, figsize=(8.2, 7.2), sharex=True,
+    gridspec_kw={"height_ratios": [2.1, 1]}
+)
+fig.subplots_adjust(
+    left=0.13, right=0.95, bottom=0.05, top=0.84, hspace=0.30
+)
+
+for country in drawing_order:
+    color, line_style = styles[country]
+
+    top.plot(
+        years, wide.loc[country],
+        color=color, linestyle=line_style,
+        marker="o", markersize=3,
+        linewidth=2.4 if country == focus else 1.4
+    )
+    top.plot(
+        [end, end + 2],
+        [wide.loc[country, end], right_labels[country]],
+        color=color, linewidth=0.7
+    )
+    top.text(
+        end + 2.3, right_labels[country], country,
+        color=color, va="center", fontsize=10
+    )
+
+top.set(
+    ylim=(low, high),
+    ylabel="Life expectancy at birth\n(years)"
+)
+top.set_title(
+    "A. Selected five-yearly values", loc="left", fontsize=11
+)
+clean_axes(top)
+
+bottom.plot(
+    spread.index, spread,
+    color="#333333", marker="o", markersize=4
+)
+bottom.scatter(
+    minimum_years, spread.loc[minimum_years],
+    color=BLUE, zorder=3
+)
+
+bottom.annotate(
+    f"Sampled minimum: {spread.min():.1f} years\n"
+    f"in {minimum_text}",
+    xy=(minimum_years[0], spread.loc[minimum_years[0]]),
+    xytext=(0.28, 0.85), textcoords="axes fraction",
+    va="top", fontsize=10,
+    arrowprops={"arrowstyle": "->", "color": "#555555"}
+)
+
+for year in (start, end):
+    bottom.text(
+        year, spread.loc[year] + 0.25,
+        f"{spread.loc[year]:.1f}", ha="center", fontsize=10
+    )
+
+bottom.set(
+    xlim=(start - 2, end + 12),
+    ylim=(0, spread.max() + 1),
+    xlabel="Year",
+    ylabel="Highest–lowest range\n(years)"
+)
+bottom.set_xticks(sorted(set(years[::2] + [end])))
+bottom.set_title(
+    "B. Between-country range", loc="left", fontsize=11
+)
+clean_axes(bottom)
+
+save(
+    fig, "figure_5_temporal",
+    "",
+    ""
+)
